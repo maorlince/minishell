@@ -1,0 +1,181 @@
+
+Your shell should:
+• Display a prompt when waiting for a new command.
+• Have a working history.
+• Search and launch the right executable (based on the PATH variable or using a
+relative or an absolute path).
+• Use at most one global variable to indicate a received signal. Consider the
+implications: this approach ensures that your signal handler will not access your
+main data structures
+Not interpret unclosed quotes or special characters which are not required by the
+subject such as \ (backslash) or ; (semicolon).
+• Handle ’ (single quote) which should prevent the shell from interpreting the meta-
+characters in the quoted sequence.
+• Handle " (double quote) which should prevent the shell from interpreting the meta-
+characters in the quoted sequence except for $ (dollar sign).
+• Implement the following redirections:
+◦ < should redirect input.
+◦ > should redirect output.
+◦ << should be given a delimiter, then read the input until a line containing the
+delimiter is seen. However, it doesn’t have to update the history!
+◦ >> should redirect output in append mode.
+• Implement pipes (| character). The output of each command in the pipeline is
+connected to the input of the next command via a pipe.
+• Handle environment variables ($ followed by a sequence of characters) which
+should expand to their values.
+• Handle $? which should expand to the exit status of the most recently executed
+foreground pipeline.
+• Handle ctrl-C, ctrl-D and ctrl-\ which should behave like in bash.
+• In interactive mode:
+◦ ctrl-C displays a new prompt on a new line.
+◦ ctrl-D exits the shell.
+◦ ctrl-\ does nothing.
+• Your shell must implement the following built-in commands:
+◦ echo with option -n
+◦ cd with only a relative or absolute path
+◦ pwd with no options
+◦ export with no options
+◦ unset with no options
+◦ env with no options or arguments
+◦ exit with no options
+
+readline(prompt)
+    Affiche un prompt et lit une ligne de commande entrée par l’utilisateur.
+    Gère l’édition de ligne et l’historique automatiquement.
+add_history(line)
+    Ajoute la ligne passée à l’historique de Readline.
+rl_clear_history()
+    Efface l’historique des commandes Readline.
+rl_on_new_line(), rl_replace_line(line, 0), rl_redisplay()
+    Fonctions internes de Readline pour manipuler l'affichage et l'entrée (rarement utiles dans un usage simple).
+
+printf()
+    Fonction standard pour afficher du texte formaté.
+strerror(errno)
+    Retourne une chaîne lisible correspondant à un code d’erreur (errno).
+perror(message)
+    Affiche une erreur formatée selon errno avec un message custom.
+
+write(fd, buf, count)
+    Écrit count octets du buffer buf dans le descripteur fd.
+read(fd, buf, count)
+    Lit count octets du descripteur fd dans buf.
+open(path, flags) / close(fd)
+    Ouvre ou ferme un fichier. Nécessaire pour la redirection (>, <, >>...).
+
+fork()
+    Crée un nouveau processus (copie du parent). Fondamental pour exécuter des commandes.
+execve(path, argv, envp)
+    Remplace le processus courant par un autre programme (la commande exécutée).
+wait(pid) / waitpid(pid, ...), wait3, wait4
+    Attend la fin d’un processus enfant.
+exit(status)
+    Termine le processus courant.
+kill(pid, sig)
+    Envoie un signal à un processus.
+
+signal(sig, handler)
+    Définit un gestionnaire pour un signal (ex. : SIGINT pour Ctrl+C).
+sigaction, sigemptyset, sigaddset
+    Utilisé pour gérer les signaux de façon plus fine que signal.
+
+stat, lstat, fstat
+    Récupèrent des informations sur un fichier.
+unlink(path)
+    Supprime un fichier.
+opendir(path) / readdir() / closedir()
+    Permettent de lire le contenu d’un répertoire (utile pour ls).
+
+isatty(fd)
+    Vérifie si un descripteur est un terminal.
+ttyname(fd)
+    Retourne le nom du terminal associé à un descripteur.
+ttyslot()
+    Donne l’index du terminal.
+ioctl(fd, request, ...)
+    Permet de manipuler un périphérique (peu utilisé dans minishell).
+
+getenv(name)
+    Récupère la valeur d’une variable d’environnement.
+getcwd(buf, size)
+    Donne le chemin absolu du répertoire courant.
+chdir(path)
+    Change le répertoire de travail (implémentation de cd).
+
+dup(fd) / dup2(fd, newfd)
+    Dupliquent des descripteurs de fichiers. Utilisés pour rediriger stdin/stdout.
+pipe(fd[2])
+    Crée un tube (pipe) pour communiquer entre processus.
+
+Ces fonctions sont utilisées pour manipuler des capacités du terminal (affichage, curseur…).
+tgetent(buf, term)
+    Initialise la base de données Termcap.
+tgetflag(capname), tgetnum(capname), tgetstr(capname, area)
+    Lisent des capacités du terminal (booléennes, numériques, chaînes).
+tgoto(cap, col, row)
+    Positionne le curseur.
+tputs(str, affcnt, putc)
+    Affiche une chaîne formatée avec gestion du terminal.
+
+    Déterminer si une commande est un built-in.
+        Si oui → exécuter dans le processus courant (important pour cd, exit, etc.).
+        Si non → forker un nouveau processus avec execve().
+
+sudo apt install libreadline-dev
+
+> 0	Le parent, pid vaut le PID du fils
+== 0 Le fils
+< 0	Erreur : fork a échoué
+
+WIFSIGNALED(status)
+"Est-ce que le processus s’est terminé à cause d’un signal (ex: Ctrl+C, Ctrl+) ?"
+WTERMSIG(status)
+"Quel signal a causé la fin du processus ?"
+
+SIGINT	2	Ctrl+C
+SIGQUIT	3	Ctrl+\
+SIGKILL	9	kill -9
+SIGTERM	15	kill (normal)
+
+************** pour open
+0 → notation octale (base 8)
+X = droits du propriétaire
+Y = droits du groupe
+Z = droits des autres (public)
+
+O_RDONLY	Ouvre en lecture seule
+O_WRONLY	Ouvre en écriture seule
+O_RDWR	Lecture + écriture
+O_CREAT	Crée le fichier s’il n’existe pas
+O_TRUNC	Vide le fichier s’il existe déjà (taille mise à 0)
+O_APPEND	Écrit toujours à la fin du fichier (ajout)
+
+0	000	---
+1	001	--x (exécuter)
+2	010	-w- (écrire)
+4	100	r-- (lire)
+6	110	rw- (lire + écrire)
+7	111	rwx (lire + écrire + exécuter)
+****************
+
+STDIN_FILENO	0	Entrée standard (clavier)
+STDOUT_FILENO	1	Sortie standard (écran)
+STDERR_FILENO	2	Sortie d’erreur standard
+
+pour test utiliser bash avec : bash --posix
+.supp pour ne par avoir de leak readline et commande a faire :
+valgrind --leak-check=full --show-leak-kinds=all --suppressions=.supp ./minishell
+
+guide avec graphiques explicatifs de minishell:
+https://medium.com/@mostafa.omrane/mes-conseils-si-je-devais-recommencer-minishell-a9783c51ba1b
+lien avec 800 tests pour minishell:
+https://docs.google.com/spreadsheets/d/1BPW7k81LJPhGv2fbi35NIIoOC_mGZXQQJDnV0SjulFs/edit?pli=1&gid=0#gid=0
+video travail a deux
+https://www.youtube.com/live/8tbaCbtdjeg
+doc/guide
+https://carlagoeshacking.wordpress.com/wp-content/uploads/2017/01/minisheel.pdf
+https://www.cs.purdue.edu/homes/grr/SystemsProgrammingBook/Book/Chapter5-WritingYourOwnShell.pdf
+others docs...
+https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_10
+https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html
+
