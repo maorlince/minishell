@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:49 by manon             #+#    #+#             */
-/*   Updated: 2025/08/29 14:51:33 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/04 17:12:19 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,6 @@ int	count_args(t_token *token)
 	{
 		if (token->type == WORD || token->type == ENV)
 			count++;
-		else if (token->type == INPUT || token->type == OUTPUT
-			|| token->type == APPEND || token->type == HEREDOC)
-			token = token->next;
 		token = token->next;
 	}
 	return (count);
@@ -47,9 +44,6 @@ char	**fill_argv(t_token *token, int argc)
 				return (free_split(argv), NULL);
 			i++;
 		}
-		else if (token->type == INPUT || token->type == OUTPUT
-			|| token->type == APPEND || token->type == HEREDOC)
-			token = token->next;
 		token = token->next;
 	}
 	argv[i] = NULL;

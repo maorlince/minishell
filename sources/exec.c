@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 06:21:25 by manon             #+#    #+#             */
-/*   Updated: 2025/08/28 20:34:29 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 21:12:18 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ char	*find_command(const char *name, t_env *env)
 }
 
 //a opti plus tard!!!!!!!!!!!!!!!!
+//size de la cmd a changer, pas manuellement
 static int	is_parent_builtin(t_cmd *cmd)
 {
 	if (!cmd || !cmd->argv || !cmd->argv[0])
@@ -113,10 +114,11 @@ int	execute_commands(t_cmd *cmd_list, t_env **env)
 			{
 				printf("%s: command not found\n", cmd->argv[0]);
 				free_str_tab(env_tab);
-				return (127);
+				exit(127);
 			}
-			if (setup_redirections(cmd) != 0)
-				exit(1);
+			signal(SIGINT, SIG_DFL);
+			signal(SIGQUIT, SIG_DFL);
+			//ajout 2l signaux
 			execve(path, cmd->argv, env_tab);
 			perror("execve failed");
 			free(path);
@@ -125,7 +127,13 @@ int	execute_commands(t_cmd *cmd_list, t_env **env)
 		}
 		else
 		{
-			waitpid(pid, NULL, 0);
+			//waitpid(pid, NULL, 0);
+			int status;
+			waitpid(pid, &status, 0);
+			if (WIFEXITED(status))
+			    (*env)->last_exit = WEXITSTATUS(status);
+			else if (WIFSIGNALED(status))
+			    (*env)->last_exit = 128 + WTERMSIG(status);//fin d'ajout
 			if (in_fd != 0)
 				close(in_fd);
 			if (cmd->next)
@@ -136,5 +144,5 @@ int	execute_commands(t_cmd *cmd_list, t_env **env)
 		}
 		cmd = cmd->next;
 	}
-	return (0);
+	return ((*env)->last_exit);
 }

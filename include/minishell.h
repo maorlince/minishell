@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 14:21:04 by manon             #+#    #+#             */
-/*   Updated: 2025/08/29 14:54:32 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 20:08:52 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include <stdlib.h>// exit malloc free getenv
 # include <stdio.h>// printf perror
 # include <string.h>// strerror
-# include <sys/types.h>// wait waitpid_t pid_t size_t
+# include <sys/types.h>// wait waitpid pid_t size_t
 # include <sys/wait.h>// wait?
 # include <signal.h>// kill signal
 # include <fcntl.h>// open
@@ -72,7 +72,6 @@ typedef struct s_env
 }	t_env;
 
 //utils.c : fonctions utilitaires
-void	init_env_if_missing(t_env **env);
 void	free_tokens(t_token *tokens);
 void	free_cmds(t_cmd *cmds);
 void	free_split(char **split);
@@ -110,7 +109,6 @@ void	free_str_tab(char **tabs);
 void	free_env_list(t_env *env);
 
 //expand.c : gere les expansion des variables d'environnement
-char	*get_env_value(char *env_name);
 char	*expand_variable(t_token *token, t_env *env, int i);
 int		expand_tokens(t_token *tokens, t_env *env);
 

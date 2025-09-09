@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/12 21:46:28 by manon             #+#    #+#             */
-/*   Updated: 2025/08/29 14:55:08 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 20:08:44 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,13 @@ t_env	*build_env_list(char **env)
 		if (equal_value)
 		{
 			type = ft_substr(env[i], 0, equal_value - env[i]);
-			value = ft_strdup(equal_value + 1);
+			value = ft_strdup(equal_value + 1);//env_new strdup same things
 			env_add_back(&head, env_new(type, value));
 			free(type);
 			free(value);
 		}
 		i++;
 	}
-	init_env_if_missing(&head);
 	return (head);
 }
 
@@ -66,10 +65,10 @@ char	**env_list_to_tab(t_env *env)
 	while (env)
 	{
 		tabs[i] = malloc(ft_strlen(env->type) + 1 + ft_strlen(env->value) + 1);
-		if (!tabs[i])
+		if (!tabs[i]) //free tabs[i] deja alloués
 			return (NULL);
 		ft_strlcpy(tabs[i], env->type, ft_strlen(env->type) + 1);
-		ft_strlcat(tabs[i], "=", ft_strlen(env->type) + 1);
+		ft_strlcat(tabs[i], "=", ft_strlen(env->type) + 2);
 		ft_strlcat(tabs[i], env->value, ft_strlen(env->type)
 			+ 1 + ft_strlen(env->value) + 1);
 		i++;

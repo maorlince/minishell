@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:15 by manon             #+#    #+#             */
-/*   Updated: 2025/08/29 18:02:43 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 20:41:16 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ int	get_type(char *line)
 {
 	if (!line || !*line)
 		return (UNKNOWN);
-	if (is_token(line[1]) && line[0] != line[1])
-		return (-2);
+	//if (is_token(line[1]) && line[0] != line[1])
+	//	return (-2);
 	if (line[0] == '|' && line[1] != '|')
 		return (PIPE);
 	if (line[0] == '>')
@@ -124,7 +124,7 @@ int	lexer_loop(t_token **head, t_env *env, char *line)
 		while (line[i] && is_token(line[i]) == 1)
 			i++;
 		size = get_size(&line[i]);
-		if (size == -1 || size == -2)
+		if (size == -1 )//|| size == -2)
 			return (printf("Invalid command\n"));
 		new_token = create_token(&line[i], 0, size);
 		if (!new_token || !line[i])

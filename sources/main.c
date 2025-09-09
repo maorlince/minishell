@@ -6,31 +6,32 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/08/29 18:03:58 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 21:30:52 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-//still reachable readline ~230-240 bytes normal
-
-//a revoir exit qui affiche success au lieu de failure??
-//leaks a revoir et norme
+// still reachable readline ~230-240 bytes normal
+//norme
 
 // | a executer en meme temps (sleep 3 | ls)
-// ls > t1 > t2 > t3 (bien creer tout les fichier)
+// ls > t1 > t2 > t3 (bien creer tout les fichiers)
 
-//double exit quand command not found
+// seg fault si rien apres/avant token
 
-// seg fault si rien apres token
+//>> nom qui se colle dans le fichier
 
 // saut de ligne fin delimiter
 // ajout delimiter pour unmatched quotes?
 
+// strncmp a remplacer par strcmp partout je pense
+// last_exit en global?
+
 static void	handle_signal(int sig)
 {
 	(void)sig;
-	write(1, "\n", 1);
+	printf("\n");
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
@@ -93,7 +94,8 @@ int	main(int argc, char **argv, char **envp)
 		line = read_input();
 		if (!line)
 			break ;
-		if (handle_line(line, &env) == -1)
+		//printf("%d\n", handle_line(line, &env));
+		if (handle_line(line, &env) == -1) //|| -2 (if erase this i crash my cmds)
 			break ;
 	}
 	free_env_list(env);
