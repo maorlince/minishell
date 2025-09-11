@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 14:21:04 by manon             #+#    #+#             */
-/*   Updated: 2025/09/09 20:08:52 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/11 20:55:34 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,13 @@ typedef struct s_token
 	struct s_token	*next;
 }	t_token;
 
+typedef struct s_redir
+{
+	int				type; //1: input, 2: heredoc, 3: output, 4: append
+	char			*file; // filename for redirection
+	struct s_redir	*next;
+}	t_redir;
+
 typedef struct s_cmd
 {
 	char			**argv;
@@ -60,6 +67,7 @@ typedef struct s_cmd
 	char			*outfile; // "exemple" > "exemple_outfile"
 	char			*heredoc_content; // "exemple" << "exemple_heredoc"
 	int				content; //1: append, 0: truncate
+	t_redir			*redirections; // list of redirections
 	struct s_cmd	*next; // next command, after a pipe
 }	t_cmd;
 
@@ -77,10 +85,10 @@ void	free_cmds(t_cmd *cmds);
 void	free_split(char **split);
 
 //exec.c : fonctions d'exécution
+//static char	*build_full_path(char *dir, const char *name);
 char	*find_command(const char *name, t_env *env);
-//static int	execute_single(t_cmd *cmd, t_env **env)
+//static int	is_parent_builtin(t_cmd *cmd);
 int		execute_commands(t_cmd *cmd_list, t_env **env);
-//void 	execute_cmd_list(t_cmd *cmd_list);
 
 //builtins.c : fonctions des builtins
 int		builtin_echo(char **argv);
@@ -107,6 +115,8 @@ t_env	*build_env_list(char **envp);
 char	**env_list_to_tab(t_env *env);
 void	free_str_tab(char **tabs);
 void	free_env_list(t_env *env);
+void	ft_lstadd_back_redir(t_redir **lst, t_redir *new);
+t_redir	*ft_lstnew_redir(char *file, int type);
 
 //expand.c : gere les expansion des variables d'environnement
 char	*expand_variable(t_token *token, t_env *env, int i);

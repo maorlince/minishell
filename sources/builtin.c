@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/12 19:36:43 by manon             #+#    #+#             */
-/*   Updated: 2025/09/04 18:52:27 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 21:47:28 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,14 +77,6 @@ int	builtin_cd(char **argv)
 		perror("cd");
 		return (1);
 	}
-	//a ajouter?
-	//char *oldpwd = env_get(*env, "PWD");
-	//if (oldpwd) env_set(env, "OLDPWD", oldpwd);
-	//cwd = getcwd(NULL, 0);
-	//if (cwd) {
-	//    env_set(env, "PWD", cwd);
-	//    free(cwd);
-	//}
 	return (0);
 }
 

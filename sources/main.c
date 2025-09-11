@@ -6,28 +6,18 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/09/09 21:30:52 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/11 21:40:16 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
 // still reachable readline ~230-240 bytes normal
-//norme
+//valgrind --leak-check=full --trace-children=yes --track-fds=yes --show-leak-kinds=all --suppressions=.supp --errors-for-leak-kinds=all ./minishell
 
-// | a executer en meme temps (sleep 3 | ls)
-// ls > t1 > t2 > t3 (bien creer tout les fichiers)
-
-// seg fault si rien apres/avant token
-
-//>> nom qui se colle dans le fichier
-
-// saut de ligne fin delimiter
-// ajout delimiter pour unmatched quotes?
-
-// strncmp a remplacer par strcmp partout je pense
-// last_exit en global?
-
+// | ls   execute ls normal sans commentaire??
+// affiche export= vide
+//builtins strncmp au lieu de strcmp
 static void	handle_signal(int sig)
 {
 	(void)sig;
@@ -45,12 +35,6 @@ static char	*read_input(void)
 	if (line && *line)
 		add_history(line);
 	return (line);
-}
-
-static void	free_cmds_tokens(t_cmd *cmds, t_token *tokens)
-{
-	free_cmds(cmds);
-	free_tokens(tokens);
 }
 
 int	handle_line(char *line, t_env **env)
@@ -72,8 +56,9 @@ int	handle_line(char *line, t_env **env)
 		free(line);
 		return (1);
 	}
+	free_tokens(tokens);
 	(*env)->last_exit = execute_commands(cmds, env);
-	free_cmds_tokens(cmds, tokens);
+	free_cmds(cmds);
 	free(line);
 	return (0);
 }
@@ -82,6 +67,7 @@ int	main(int argc, char **argv, char **envp)
 {
 	t_env	*env;
 	char	*line;
+	int		status;
 
 	(void)argc;
 	(void)argv;
@@ -94,11 +80,11 @@ int	main(int argc, char **argv, char **envp)
 		line = read_input();
 		if (!line)
 			break ;
-		//printf("%d\n", handle_line(line, &env));
-		if (handle_line(line, &env) == -1) //|| -2 (if erase this i crash my cmds)
+		if (handle_line(line, &env) == -1)
 			break ;
 	}
+	status = env->last_exit;
 	free_env_list(env);
 	printf("exit\n");
-	return (env->last_exit);
+	return (status);
 }

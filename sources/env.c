@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/12 20:32:18 by manon             #+#    #+#             */
-/*   Updated: 2025/09/09 19:53:10 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/09 21:46:55 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ t_env	*env_new(char *type, char *value)
 		free(node);
 		return (NULL);
 	}
-	//node->last_exit = 0; inutile?
 	node->next = NULL;
 	return (node);
 }

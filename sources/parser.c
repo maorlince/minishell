@@ -6,21 +6,41 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:49 by manon             #+#    #+#             */
-/*   Updated: 2025/09/04 17:12:19 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/11 21:34:35 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
+//void	print_redirections(t_redir *redir)
+//{
+//	if (!redir)
+//	{
+//		fprintf(stderr, "No redirections found.\n");
+//		return ;
+//	}
+//	while (redir)
+//	{
+//		fprintf(stderr, "Redirection: type=%d, file='%s'\n", redir->type, redir->file);
+//		redir = redir->next;
+//	}
+//}
+
 int	count_args(t_token *token)
 {
 	int	count;
+	int was_red;
 
 	count = 0;
+	was_red = 0;
 	while (token && token->type != PIPE)
 	{
-		if (token->type == WORD || token->type == ENV)
+		if (!was_red && (token->type == WORD || token->type == ENV))
 			count++;
+		if (token->type >= INPUT && token->type <= APPEND)
+			was_red = 1;
+		else if (was_red)
+			was_red = 0;
 		token = token->next;
 	}
 	return (count);
@@ -30,20 +50,26 @@ char	**fill_argv(t_token *token, int argc)
 {
 	char	**argv;
 	int		i;
+	int		was_red;
 
 	i = 0;
+	was_red = 0;
 	argv = malloc(sizeof(char *) * (argc + 1));
 	if (!argv)
 		return (NULL);
 	while (token && token->type != PIPE)
 	{
-		if (token->type == WORD || token->type == ENV)
+		if (!was_red && (token->type == WORD || token->type == ENV))
 		{
 			argv[i] = ft_strdup(token->value);
 			if (!argv[i])
 				return (free_split(argv), NULL);
 			i++;
 		}
+		else if (token->type >= INPUT && token->type <= APPEND)
+			was_red = 1;
+		else if (was_red)
+			was_red = 0;
 		token = token->next;
 	}
 	argv[i] = NULL;
@@ -89,36 +115,13 @@ void	copy_redirections(t_token *token, t_cmd *cmd)
 	cmd->outfile = NULL;
 	cmd->heredoc_content = NULL;
 	cmd->content = 0;
+	cmd->redirections = NULL;
 	while (token && token->type != PIPE)
 	{
-		if (token->type == INPUT && token->next && token->next->value)
+		if (token->type >= INPUT && token->type <= APPEND)
 		{
-			if (cmd->infile)
-				free(cmd->infile);
-			cmd->infile = ft_strdup(token->next->value);
-		}
-		else if (token->type == OUTPUT && token->next && token->next->value)
-		{
-			if (cmd->outfile)
-				free(cmd->outfile);
-			cmd->outfile = ft_strdup(token->next->value);
-			cmd->content = 0;
-		}
-		else if (token->type == APPEND && token->next && token->next->value)
-		{
-			if (cmd->outfile)
-				free(cmd->outfile);
-			cmd->outfile = ft_strdup(token->next->value);
-			cmd->content = 1;
-		}
-		else if (token->type == HEREDOC && token->next && token->next->value)
-		{
-			if (cmd->heredoc_content)
-			{
-				free(cmd->heredoc_content);
-				cmd->heredoc_content = NULL;
-			}
-			cmd->heredoc_content = get_heredoc_content(token->next->value);
+			ft_lstadd_back_redir(&(cmd->redirections),
+				ft_lstnew_redir(token->next->value, token->type));
 		}
 		token = token->next;
 	}
@@ -149,6 +152,7 @@ t_cmd	*create_command(t_token **token_list)
 	}
 	else
 		cmd->next = NULL;
+	//print_redirections(cmd->redirections);
 	return (cmd);
 }
 
@@ -182,34 +186,46 @@ int	setup_heredoc(char *content)
 int	setup_redirections(t_cmd *cmd)
 {
 	int	fd;
+	t_redir	*tmp;
 
 	if (!cmd)
 		return (0);
-	if (cmd->heredoc_content)
+	tmp = cmd->redirections;
+	while (tmp)
 	{
-		if (setup_heredoc(cmd->heredoc_content))
-			return (1);
-	}
-	else if (cmd->infile)
-	{
-		fd = open(cmd->infile, O_RDONLY);
-		if (fd < 0)
-			return (perror(cmd->infile), 1);
-		if (dup2(fd, STDIN_FILENO) == -1)
-			return (close(fd), perror("dup2"), 1);
-		close(fd);
-	}
-	if (cmd->outfile)
-	{
-		if (cmd->content)
-			fd = open(cmd->outfile, O_WRONLY | O_CREAT | O_APPEND, 0644);
-		else
-			fd = open(cmd->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (fd < 0)
-			return (perror(cmd->outfile), 1);
-		if (dup2(fd, STDOUT_FILENO) == -1)
-			return (close(fd), perror("dup2"), 1);
-		close(fd);
+		if (tmp->type == HEREDOC && tmp->file)
+		{
+			if (setup_heredoc(tmp->file))
+				return (1);
+		}
+		else if (tmp->type == INPUT && tmp->file)
+		{
+			fd = open(tmp->file, O_RDONLY);
+			if (fd < 0)
+				return (perror(tmp->file), 1);
+			if (dup2(fd, STDIN_FILENO) == -1)
+				return (close(fd), perror("dup2"), 1);
+			close(fd);
+		}
+		else if (tmp->type == OUTPUT && tmp->file)
+		{
+			fd = open(tmp->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			if (fd < 0)
+				return (perror(tmp->file), 1);
+			if (dup2(fd, STDOUT_FILENO) == -1)
+				return (close(fd), perror("dup2"), 1);
+			close(fd);
+		}
+		else if (tmp->type == APPEND && tmp->file)
+		{
+			fd = open(tmp->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+			if (fd < 0)
+				return (perror(tmp->file), 1);
+			if (dup2(fd, STDOUT_FILENO) == -1)
+				return (close(fd), perror("dup2"), 1);
+			close(fd);
+		}
+		tmp = tmp->next;
 	}
 	return (0);
 }

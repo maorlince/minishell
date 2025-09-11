@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:15 by manon             #+#    #+#             */
-/*   Updated: 2025/09/09 20:41:16 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/11 20:44:01 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,9 @@ int	get_type(char *line)
 {
 	if (!line || !*line)
 		return (UNKNOWN);
-	//if (is_token(line[1]) && line[0] != line[1])
-	//	return (-2);
+	if ((line[0] == '|' && line[1] == '|') 
+		|| (is_token(line[0]) == 2 && !line[1]))
+			return (-2);
 	if (line[0] == '|' && line[1] != '|')
 		return (PIPE);
 	if (line[0] == '>')
@@ -123,10 +124,21 @@ int	lexer_loop(t_token **head, t_env *env, char *line)
 	{
 		while (line[i] && is_token(line[i]) == 1)
 			i++;
+		if (!line[i])
+			break ;
 		size = get_size(&line[i]);
-		if (size == -1 )//|| size == -2)
+		if (size == -1)
 			return (printf("Invalid command\n"));
 		new_token = create_token(&line[i], 0, size);
+		if (size == -2)
+		{
+			printf("syntax error near unexpected token \"%c\"\n", line[i]);
+			if (head)
+				free_tokens(*head);
+			free_tokens(new_token);
+			return (-1);
+			//return (free_tokens(*head), 1);
+		}
 		if (!new_token || !line[i])
 			return (free_tokens(*head), 1);
 		if (!*head)
