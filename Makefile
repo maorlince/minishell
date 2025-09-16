@@ -13,12 +13,15 @@ SRCS = $(SRCDIR)/builtin.c \
 	   $(SRCDIR)/builtins_utils.c \
 	   $(SRCDIR)/env_utils.c \
 	   $(SRCDIR)/env.c \
+	   $(SRCDIR)/exec_utils.c \
 	   $(SRCDIR)/exec.c \
 	   $(SRCDIR)/expand.c \
+	   $(SRCDIR)/free.c \
+	   $(SRCDIR)/lexer_utils.c \
 	   $(SRCDIR)/lexer.c \
-	   $(SRCDIR)/parser.c \
 	   $(SRCDIR)/main.c \
-	   $(SRCDIR)/utils.c
+	   $(SRCDIR)/parser_utils.c \
+	   $(SRCDIR)/parser.c
 
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 

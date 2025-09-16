@@ -6,11 +6,21 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/29 14:52:05 by manon             #+#    #+#             */
-/*   Updated: 2025/08/29 14:52:57 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/16 22:22:04 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
+
+int	ft_strcmp(const char *s1, const char *s2)
+{
+	while (*s1 && (*s1 == *s2))
+	{
+		s1++;
+		s2++;
+	}
+	return (*(unsigned char *)s1 - *(unsigned char *)s2);
+}
 
 static int	builtin_export(char **argv, t_env **env)
 {
@@ -50,7 +60,7 @@ static int	builtin_unset(char **argv, t_env **env)
 	return (0);
 }
 
-static int	builtin_exit(char **argv, t_env **env)
+static int	builtin_exit(char **argv, t_env **env, t_cmd **cmd)
 {
 	int	i;
 
@@ -58,7 +68,8 @@ static int	builtin_exit(char **argv, t_env **env)
 	if (argv[1] && argv[2])
 	{
 		printf("exit: too many arguments\n");
-		(*env)->last_exit = 1;
+		if (env && *env)
+			(*env)->last_exit = 1;
 		return (1);
 	}
 	if (argv[1])
@@ -67,30 +78,31 @@ static int	builtin_exit(char **argv, t_env **env)
 		while (ft_isdigit(argv[1][i]))
 			i++;
 		if (argv[1][i] == '\0')
-			exit((unsigned char)ft_atoi(argv[1]));
+			return (free_env_list(*env), free_cmds(*cmd),
+				exit((unsigned char)ft_atoi(argv[1])), 0);
 		printf("exit: %s: numeric argument required\n", argv[1]);
-		exit(2);
+		return (free_env_list(*env), free_cmds(*cmd), exit(2), 2);
 	}
-	exit((*env)->last_exit);
+	return (free_env_list(*env), free_cmds(*cmd), exit(0), 0);
 }
 
 int	exec_builtin(t_cmd *cmd, t_env **env)
 {
 	if (!cmd || !cmd->argv || !cmd->argv[0])
 		return (-1);
-	if (ft_strncmp(cmd->argv[0], "echo", 4) == 0)
+	if (ft_strcmp(cmd->argv[0], "echo") == 0)
 		return (builtin_echo(cmd->argv));
-	if (ft_strncmp(cmd->argv[0], "pwd", 3) == 0)
+	if (ft_strcmp(cmd->argv[0], "pwd") == 0)
 		return (builtin_pwd());
-	if (ft_strncmp(cmd->argv[0], "cd", 2) == 0)
+	if (ft_strcmp(cmd->argv[0], "cd") == 0)
 		return (builtin_cd(cmd->argv));
-	if (ft_strncmp(cmd->argv[0], "env", 3) == 0)
+	if (ft_strcmp(cmd->argv[0], "env") == 0)
 		return (builtin_env(*env));
-	if (ft_strncmp(cmd->argv[0], "export", 6) == 0)
+	if (ft_strcmp(cmd->argv[0], "export") == 0)
 		return (builtin_export(cmd->argv, env));
-	if (ft_strncmp(cmd->argv[0], "unset", 5) == 0)
+	if (ft_strcmp(cmd->argv[0], "unset") == 0)
 		return (builtin_unset(cmd->argv, env));
-	if (ft_strncmp(cmd->argv[0], "exit", 4) == 0)
-		return (builtin_exit(cmd->argv, env));
+	if (ft_strcmp(cmd->argv[0], "exit") == 0)
+		return (builtin_exit(cmd->argv, env, &cmd));
 	return (-1);
 }

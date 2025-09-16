@@ -6,30 +6,13 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 06:21:25 by manon             #+#    #+#             */
-/*   Updated: 2025/09/11 21:39:30 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/17 00:32:06 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-static char	*build_full_path(char *dir, const char *name)
-{
-	size_t	len;
-	char	*full;
-
-	len = ft_strlen(dir) + 1 + ft_strlen(name) + 1;
-	full = malloc(len);
-	if (!full)
-		return (NULL);
-	full[0] = '\0';
-	ft_strlcat(full, dir, len);
-	ft_strlcat(full, "/", len);
-	ft_strlcat(full, name, len);
-	return (full);
-}
-
-// access vérifie si la commande est exécutable
-char	*find_command(const char *name, t_env *env)
+static char	*find_command(const char *name, t_env *env)
 {
 	char	*path_env;
 	char	**dirs;
@@ -49,194 +32,115 @@ char	*find_command(const char *name, t_env *env)
 		if (!full)
 			break ;
 		if (access(full, X_OK) == 0)
-			return (free_str_tab(dirs), full);
+			return (free_tab(dirs), full);
 		free(full);
 		i++;
 	}
-	free_str_tab(dirs);
+	free_tab(dirs);
 	return (NULL);
 }
 
-static int	is_parent_builtin(t_cmd *cmd)
+static void	exec_external(t_cmd *cmd, t_env **env,
+		t_cmd *cmd_list, char **env_tab)
 {
-	if (!cmd || !cmd->argv || !cmd->argv[0])
-		return (0);
-	if (!ft_strncmp(cmd->argv[0], "cd", 2))
-		return (1);
-	if (!ft_strncmp(cmd->argv[0], "export", 6))
-		return (1);
-	if (!ft_strncmp(cmd->argv[0], "unset", 5))
-		return (1);
-	if (!ft_strncmp(cmd->argv[0], "exit", 4))
-		return (1);
-	return (0);
+	char	*path;
+
+	if (cmd->argv[0][0] == '/' || cmd->argv[0][0] == '.')
+		path = ft_strdup(cmd->argv[0]);
+	else
+		path = find_command(cmd->argv[0], *env);
+	if (!path)
+	{
+		perror ("command not found");
+		free_cmds(cmd_list);
+		free_env_list(*env);
+		free_tab(env_tab);
+		exit(127);
+	}
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
+	execve(path, cmd->argv, env_tab);
+	perror("execve failed");
+	free(path);
+	free_tab(env_tab);
+	free_cmds(cmd_list);
+	free_env_list(*env);
+	exit(1);
+}
+
+static void	child_process(t_cmd *cmd, t_env **env, t_cmd *cmd_list)
+{
+	char	**env_tab;
+	int		n;
+
+	if (!cmd->argv[0] || exec_builtin(cmd, env) != -1)
+	{
+		n = (*env)->last_exit;
+		free_env_list(*env);
+		free_cmds(cmd_list);
+		exit(n);
+	}
+	env_tab = env_list_to_tab(*env);
+	exec_external(cmd, env, cmd_list, env_tab);
+}
+
+static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd, int *fd)
+{
+	pid_t	pid;
+	t_cmd	*cmd_list;
+
+	cmd_list = cmd;
+	pid = fork();
+	if (pid < 0)
+		return (-1);
+	if (pid == 0)
+	{
+		if (in_fd != 0)
+		{
+			dup2(in_fd, 0);
+			close(in_fd);
+		}
+		if (cmd->next)
+		{
+			close(fd[0]);
+			dup2(fd[1], 1);
+			close(fd[1]);
+		}
+		if (setup_redirections(cmd) != 0)
+			exit(1);
+		child_process(cmd, env, cmd_list);
+	}
+	return (pid);
 }
 
 int	execute_commands(t_cmd *cmd_list, t_env **env)
 {
-	t_cmd	*cmd = cmd_list;
-	int		in_fd = 0;
+	t_cmd	*cmd;
+	int		in_fd;
 	int		fd[2];
 	pid_t	pids[256];
-	int		pcount = 0;
+	int		pcount;
+	int		ret;
 
+	cmd = cmd_list;
+	in_fd = 0;
+	pcount = 0;
 	while (cmd)
 	{
 		if (is_parent_builtin(cmd) && !cmd->next)
-			return (exec_builtin(cmd, env));
+		{
+			ret = exec_builtin(cmd, env);
+			return (free_cmds(cmd_list), ret);
+		}
 		if (cmd->next && pipe(fd) < 0)
 			return (perror("pipe"), -1);
-
-		pids[pcount] = fork();
+		pids[pcount] = launch_child(cmd, env, in_fd, fd);
 		if (pids[pcount] < 0)
 			return (perror("fork"), -1);
-		if (pids[pcount] == 0)
-		{
-			if (in_fd != 0)
-			{
-				dup2(in_fd, 0);
-				close(in_fd);
-			}
-			if (cmd->next)
-			{
-				close(fd[0]);
-				dup2(fd[1], 1);
-				close(fd[1]);
-			}
-			if (setup_redirections(cmd) != 0)
-				exit(1);
-			if (!cmd->argv[0] || exec_builtin(cmd, env) != -1)
-			{
-				int n =  (*env)->last_exit;
-				free_env_list(*env);
-				free_cmds(cmd_list);
-				exit(n);
-			}
-			char	**env_tab = env_list_to_tab(*env);
-			char	*path;
-			if (cmd->argv[0][0] == '/' || cmd->argv[0][0] == '.')
-				path = ft_strdup(cmd->argv[0]);
-			else
-				path = find_command(cmd->argv[0], *env);
-			if (!path)
-			{
-				printf("%s: command not found\n", cmd->argv[0]);
-				free_cmds(cmd_list);
-				free_env_list(*env);
-				free_str_tab(env_tab);
-				exit(127);
-			}
-			signal(SIGINT, SIG_DFL);
-			signal(SIGQUIT, SIG_DFL);
-			//ajout 2l signaux
-			execve(path, cmd->argv, env_tab);
-			perror("execve failed");
-			free(path);
-			free_str_tab(env_tab);
-			free_cmds(cmd_list);
-			free_env_list(*env);
-			exit(1);
-		}
-		else
-		{
-			pcount++;
-			if (in_fd)
-				close(in_fd);
-			if (cmd->next)
-			{
-				close(fd[1]);
-				in_fd = fd[0];
-			}
-		}
+		pcount++;
+		update_fds(&in_fd, fd, cmd);
 		cmd = cmd->next;
 	}
-	int status;
-	int i = 0;
-	while (i < pcount)
-	{
-		waitpid(pids[i], &status, 0);
-		if (WIFEXITED(status))
-			(*env)->last_exit = WEXITSTATUS(status);
-		else if (WIFSIGNALED(status))
-			(*env)->last_exit = 128 + WTERMSIG(status);
-		i++;
-	}
-	return ((*env)->last_exit);
+	wait_all(pids, pcount, env);
+	return (free_cmds(cmd_list), (*env)->last_exit);
 }
-
-//int	execute_commands(t_cmd *cmd_list, t_env **env)
-//{
-//	t_cmd	*cmd;
-//	int		in_fd;
-//	int		fd[2];
-//	pid_t	pid;
-//
-//	cmd = cmd_list;
-//	in_fd = 0;
-//	while (cmd)
-//	{
-//		if (is_parent_builtin(cmd) && !cmd->next)
-//			return (exec_builtin(cmd, env));
-//		if (cmd->next && pipe(fd) < 0)
-//			return (perror("pipe"), -1);
-//		pid = fork();
-//		if (pid < 0)
-//			return (perror("fork"), -1);
-//		if (pid == 0)
-//		{
-//			if (in_fd != 0)
-//			{
-//				dup2(in_fd, 0);
-//				close(in_fd);
-//			}
-//			if (cmd->next)
-//			{
-//				close(fd[0]);
-//				dup2(fd[1], 1);
-//				close(fd[1]);
-//			}
-//			if (setup_redirections(cmd) != 0)
-//				exit(1);
-//			if (exec_builtin(cmd, env) != -1)
-//				exit((*env)->last_exit);
-//			char	**env_tab = env_list_to_tab(*env);
-//			char	*path;
-//			if (cmd->argv[0][0] == '/' || cmd->argv[0][0] == '.')
-//				path = ft_strdup(cmd->argv[0]);
-//			else
-//				path = find_command(cmd->argv[0], *env);
-//			if (!path)
-//			{
-//				printf("%s: command not found\n", cmd->argv[0]);
-//				free_str_tab(env_tab);
-//				exit(127);
-//			}
-//			signal(SIGINT, SIG_DFL);
-//			signal(SIGQUIT, SIG_DFL);
-//			//ajout 2l signaux
-//			execve(path, cmd->argv, env_tab);
-//			perror("execve failed");
-//			free(path);
-//			free_str_tab(env_tab);
-//			exit(1);
-//		}
-//		else
-//		{
-//			int	status;
-//			waitpid(pid, &status, 0);
-//			if (WIFEXITED(status))
-//				(*env)->last_exit = WEXITSTATUS(status);
-//			else if (WIFSIGNALED(status))
-//				(*env)->last_exit = 128 + WTERMSIG(status);
-//			if (in_fd != 0)
-//				close(in_fd);
-//			if (cmd->next)
-//			{
-//				close(fd[1]);
-//				in_fd = fd[0];
-//			}
-//		}
-//		cmd = cmd->next;
-//	}
-//	return ((*env)->last_exit);
-//}

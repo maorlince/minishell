@@ -6,85 +6,11 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:15 by manon             #+#    #+#             */
-/*   Updated: 2025/09/11 20:44:01 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/16 21:02:13 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
-
-int	is_token(char c)
-{
-	if (c == ' ' || c == '\t' || c == '\n')
-		return (1);
-	else if (c == '|' || c == '<' || c == '>')
-		return (2);
-	else if (c == '"' || c == '\'')
-		return (3);
-	else
-		return (0);
-}
-
-int	get_type(char *line)
-{
-	if (!line || !*line)
-		return (UNKNOWN);
-	if ((line[0] == '|' && line[1] == '|') 
-		|| (is_token(line[0]) == 2 && !line[1]))
-			return (-2);
-	if (line[0] == '|' && line[1] != '|')
-		return (PIPE);
-	if (line[0] == '>')
-	{
-		if (line[1] == '>')
-			return (APPEND);
-		return (OUTPUT);
-	}
-	if (line[0] == '<')
-	{
-		if (line[1] == '<')
-			return (HEREDOC);
-		return (INPUT);
-	}
-	return (UNKNOWN);
-}
-
-int	handle_quotes(char *line)
-{
-	int		i;
-	char	quote;
-
-	quote = line[0];
-	i = 1;
-	while (line[i] && line[i] != quote)
-		i++;
-	if (!line[i])
-		return (-1);
-	return (i + 1);
-}
-
-int	get_size(char *line)
-{
-	int	i;
-	int	type;
-
-	type = get_type(line);
-	if (!line || !*line)
-		return (0);
-	if (is_token(*line) == 3)
-		return (handle_quotes(line));
-	if (type == -2)
-		return (-2);
-	if (type != UNKNOWN)
-	{
-		if (line[1] == '>' || line[1] == '<')
-			return (2);
-		return (1);
-	}
-	i = 0;
-	while (line[i] && !is_token(line[i]))
-		i++;
-	return (i);
-}
 
 t_token	*create_token(char *line, int i, int size)
 {
@@ -111,10 +37,25 @@ t_token	*create_token(char *line, int i, int size)
 	return (token);
 }
 
-int	lexer_loop(t_token **head, t_env *env, char *line)
+static int	add_new_token(t_token **head, t_token **current, char *line,
+	int size)
+{
+	t_token	*new;
+
+	new = create_token(line, 0, size);
+	if (!new)
+		return (free_tokens(*head), 1);
+	if (!*head)
+		*head = new;
+	else
+		(*current)->next = new;
+	*current = new;
+	return (0);
+}
+
+int	lexer(t_token **head, t_env *env, char *line)
 {
 	t_token	*current;
-	t_token	*new_token;
 	int		i;
 	int		size;
 
@@ -128,37 +69,15 @@ int	lexer_loop(t_token **head, t_env *env, char *line)
 			break ;
 		size = get_size(&line[i]);
 		if (size == -1)
-			return (printf("Invalid command\n"));
-		new_token = create_token(&line[i], 0, size);
+			return (printf("Invalid command\n"), -1);
 		if (size == -2)
 		{
 			printf("syntax error near unexpected token \"%c\"\n", line[i]);
-			if (head)
-				free_tokens(*head);
-			free_tokens(new_token);
-			return (-1);
-			//return (free_tokens(*head), 1);
+			return (free_tokens(*head), -1);
 		}
-		if (!new_token || !line[i])
-			return (free_tokens(*head), 1);
-		if (!*head)
-			*head = new_token;
-		else
-			current->next = new_token;
-		current = new_token;
+		if (add_new_token(head, &current, &line[i], size))
+			return (1);
 		i += size;
 	}
 	return (expand_tokens(*head, env));
-}
-
-t_token	*lexer(char *line, t_env *env)
-{
-	t_token	*head;
-
-	head = NULL;
-	if (!line)
-		return (NULL);
-	if (lexer_loop(&head, env, line))
-		return (NULL);
-	return (head);
 }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   free.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/10 16:56:38 by manon             #+#    #+#             */
-/*   Updated: 2025/09/11 21:14:26 by manon            ###   ########.fr       */
+/*   Created: 2025/09/12 00:07:35 by manon             #+#    #+#             */
+/*   Updated: 2025/09/16 20:05:40 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void	free_tokens(t_token *tokens)
 	}
 }
 
-void	free_redir(t_redir *redir)
+static void	free_redir(t_redir *redir)
 {
 	t_redir	*current;
 
@@ -51,10 +51,7 @@ void	free_cmds(t_cmd *cmds)
 		{
 			i = 0;
 			while (cmds->argv[i])
-			{
-				free(cmds->argv[i]);
-				i++;
-			}
+				free(cmds->argv[i++]);
 			free(cmds->argv);
 		}
 		if (cmds->infile)
@@ -70,49 +67,31 @@ void	free_cmds(t_cmd *cmds)
 	}
 }
 
-void	free_split(char **split)
+void	free_tab(char **tabs)
 {
 	int	i;
 
-	if (!split)
+	if (!tabs)
 		return ;
 	i = 0;
-	while (split[i])
-		free(split[i++]);
-	free(split);
+	while (tabs[i])
+	{
+		free(tabs[i]);
+		i++;
+	}
+	free(tabs);
 }
 
-t_redir *ft_lstnew_redir(char *file, int type)
+void	free_env_list(t_env *env)
 {
-	t_redir	*new;
+	t_env	*tmp;
 
-	new = malloc(sizeof(t_redir));
-	if (!new)
-		return (perror("malloc failed"), NULL);
-	new->file = ft_strdup(file);
-	if (!new->file)
-		return (free(new), perror("malloc failed"), NULL);
-	new->type = type;
-	new->next = NULL;
-	return (new);
-}
-
-void	ft_lstadd_back_redir(t_redir **lst, t_redir *new)
-{
-	t_redir	*temp;
-
-	if (!lst || !new)
+	while (env)
 	{
-		perror("malloc failed");
-		return ;
+		tmp = env->next;
+		free(env->type);
+		free(env->value);
+		free(env);
+		env = tmp;
 	}
-	if (!*lst)
-	{
-		*lst = new;
-		return ;
-	}
-	temp = *lst;
-	while (temp->next)
-		temp = temp->next;
-	temp->next = new;
 }

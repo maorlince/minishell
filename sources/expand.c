@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/19 17:10:19 by manon             #+#    #+#             */
-/*   Updated: 2025/09/09 20:49:17 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/11 23:53:43 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ char	*expand_variable(t_token *token, t_env *env, int i)
 		return (NULL);
 	if (token->value[i + 1] == '?')
 		return (ft_itoa(env->last_exit));
-	// value de $? fragile
 	start = i + 1;
 	while (token->value[start] && (ft_isalnum(token->value[start])
 			|| token->value[start] == '_'))
@@ -31,7 +30,6 @@ char	*expand_variable(t_token *token, t_env *env, int i)
 	if (!env_name)
 		return (NULL);
 	env_value = env_get(env, env_name);
-	//free(env_name); //inutile je pense
 	if (!env_value)
 		return (ft_strdup(""));
 	return (ft_strdup(env_value));
