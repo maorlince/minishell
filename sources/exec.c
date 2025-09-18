@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 06:21:25 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 00:32:06 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/17 18:55:06 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,34 +113,29 @@ static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd, int *fd)
 	return (pid);
 }
 
-int	execute_commands(t_cmd *cmd_list, t_env **env)
+int	execute_commands(t_cmd *cmd_list, t_env **env, int i)
 {
 	t_cmd	*cmd;
 	int		in_fd;
 	int		fd[2];
 	pid_t	pids[256];
-	int		pcount;
 	int		ret;
 
 	cmd = cmd_list;
 	in_fd = 0;
-	pcount = 0;
 	while (cmd)
 	{
 		if (is_parent_builtin(cmd) && !cmd->next)
-		{
-			ret = exec_builtin(cmd, env);
-			return (free_cmds(cmd_list), ret);
-		}
+			return (ret = exec_builtin(cmd, env), free_cmds(cmd_list), ret);
 		if (cmd->next && pipe(fd) < 0)
 			return (perror("pipe"), -1);
-		pids[pcount] = launch_child(cmd, env, in_fd, fd);
-		if (pids[pcount] < 0)
+		pids[i] = launch_child(cmd, env, in_fd, fd);
+		if (pids[i] < 0)
 			return (perror("fork"), -1);
-		pcount++;
+		i++;
 		update_fds(&in_fd, fd, cmd);
 		cmd = cmd->next;
 	}
-	wait_all(pids, pcount, env);
+	wait_all(pids, i, env);
 	return (free_cmds(cmd_list), (*env)->last_exit);
 }

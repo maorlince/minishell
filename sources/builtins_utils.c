@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/29 14:52:05 by manon             #+#    #+#             */
-/*   Updated: 2025/09/16 22:22:04 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/17 19:23:16 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,20 +89,20 @@ static int	builtin_exit(char **argv, t_env **env, t_cmd **cmd)
 int	exec_builtin(t_cmd *cmd, t_env **env)
 {
 	if (!cmd || !cmd->argv || !cmd->argv[0])
-		return (-1);
+		return ((*env)->last_exit = -1);
 	if (ft_strcmp(cmd->argv[0], "echo") == 0)
-		return (builtin_echo(cmd->argv));
+		return ((*env)->last_exit = builtin_echo(cmd->argv));
 	if (ft_strcmp(cmd->argv[0], "pwd") == 0)
-		return (builtin_pwd());
+		return ((*env)->last_exit = builtin_pwd());
 	if (ft_strcmp(cmd->argv[0], "cd") == 0)
-		return (builtin_cd(cmd->argv));
+		return ((*env)->last_exit = builtin_cd(cmd->argv));
 	if (ft_strcmp(cmd->argv[0], "env") == 0)
-		return (builtin_env(*env));
+		return ((*env)->last_exit = builtin_env(*env));
 	if (ft_strcmp(cmd->argv[0], "export") == 0)
-		return (builtin_export(cmd->argv, env));
+		return ((*env)->last_exit = builtin_export(cmd->argv, env));
 	if (ft_strcmp(cmd->argv[0], "unset") == 0)
-		return (builtin_unset(cmd->argv, env));
+		return ((*env)->last_exit = builtin_unset(cmd->argv, env));
 	if (ft_strcmp(cmd->argv[0], "exit") == 0)
-		return (builtin_exit(cmd->argv, env, &cmd));
-	return (-1);
+		return ((*env)->last_exit = builtin_exit(cmd->argv, env, &cmd));
+	return ((*env)->last_exit = -1);
 }

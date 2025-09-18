@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 14:21:04 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 00:35:21 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/18 17:01:27 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ void	wait_all(pid_t *pids, int count, t_env **env);
 //static void	exec_external(t_cmd *cmd, t_env **env, t_cmd *cmd_list, ...);
 //static void	child_process(t_cmd *cmd, t_env **env, t_cmd *cmd_list);
 //static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd, int *fd);
-int		execute_commands(t_cmd *cmd_list, t_env **env);
+int		execute_commands(t_cmd *cmd_list, t_env **env, int i);
 
 //builtins.c : fonctions des builtins
 int		builtin_echo(char **argv);
@@ -134,7 +134,7 @@ int		expand_tokens(t_token *tokens, t_env *env);
 int		is_token(char c);
 int		get_type(char *line);
 char	*strip_quotes(const char *src);
-int		get_size(char *line);
+int		get_size(char *line, int i);
 
 //lexer.c : tokenize la ligne de commande
 //static int	add_new_token(t_token **head, t_token **current...);

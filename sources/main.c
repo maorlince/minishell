@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 00:50:23 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/18 16:37:31 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,17 @@
 //valgrind --leak-check=full --trace-children=yes --track-fds=yes 
 //--show-leak-kinds=all --suppressions=.supp --errors-for-leak-kinds=all
 
-// static
+// static?
 // message d'erreur a revoir
-// >|>
+// >|> ? 
+// <<< message a renvoyer
+//echo [$TERM] doit afficher [xterm-256color]
 // affiche export= vide ?ok
+
+
+// <<<<< pas gerer comme il faut
+//EOF n'est plus
+
 static void	handle_signal(int sig)
 {
 	(void)sig;
@@ -59,7 +66,7 @@ int	handle_line(char *line, t_env **env)
 		return (1);
 	}
 	free_tokens(tokens);
-	(*env)->last_exit = execute_commands(cmds, env);
+	(*env)->last_exit = execute_commands(cmds, env, 0);
 	free(line);
 	return (0);
 }

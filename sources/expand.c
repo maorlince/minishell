@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/19 17:10:19 by manon             #+#    #+#             */
-/*   Updated: 2025/09/11 23:53:43 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/17 19:13:09 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@ char	*expand_variable(t_token *token, t_env *env, int i)
 	char	*env_value;
 	int		start;
 
-	if (token->value[i] != '$')
-		return (NULL);
 	if (token->value[i + 1] == '?')
 		return (ft_itoa(env->last_exit));
 	start = i + 1;
@@ -32,6 +30,7 @@ char	*expand_variable(t_token *token, t_env *env, int i)
 	env_value = env_get(env, env_name);
 	if (!env_value)
 		return (ft_strdup(""));
+	free(env_name);
 	return (ft_strdup(env_value));
 }
 

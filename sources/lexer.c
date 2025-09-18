@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:15 by manon             #+#    #+#             */
-/*   Updated: 2025/09/16 21:02:13 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/18 17:01:37 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ int	lexer(t_token **head, t_env *env, char *line)
 			i++;
 		if (!line[i])
 			break ;
-		size = get_size(&line[i]);
+		size = get_size(&line[i], 0);
 		if (size == -1)
 			return (printf("Invalid command\n"), -1);
 		if (size == -2)

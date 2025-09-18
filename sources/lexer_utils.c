@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:20:08 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 00:49:02 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/18 17:01:57 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,6 @@ char	*strip_quotes(const char *src)
 
 	i = 0;
 	j = 0;
-	if (!src)
-		return (NULL);
 	out = malloc(ft_strlen(src) + 1);
 	if (!out)
 		return (NULL);
@@ -77,30 +75,28 @@ char	*strip_quotes(const char *src)
 	return (out);
 }
 
-int	get_size(char *line)
+int	get_size(char *l, int i)
 {
-	int		i;
-	char	q;
+	char	quotes;
 
-	i = 0;
-	if (!line || !*line)
+	if (!l || !*l)
 		return (0);
-	if (get_type(line) != UNKNOWN)
+	if (get_type(l) != UNKNOWN)
 	{
-		if ((line[0] == '>' && line[1] == '>')
-			|| (line[0] == '<' && line[1] == '<'))
-				return (2);
+		if ((l[0] == '>' && l[1] == '>') || (l[0] == '<' && l[1] == '<'))
+			return (2);
 		return (1);
 	}
-	while (line[i] && !is_token(line[i]))
+	while (l[i] && !is_token(l[i]))
 	{
-		if (line[i] == '"' || line[i] == '\'')
+		if (l[i] == '"' || l[i] == '\'')
 		{
-			q = line[i++];
-			while (line[i] && line[i] != q)
+			quotes = l[i++];
+			while (l[i] && l[i] != quotes)
 				i++;
-			if (!line[i])
+			if (!l[i])
 				return (-1);
+			//quotes = 0;
 		}
 		i++;
 	}
