@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:15 by manon             #+#    #+#             */
-/*   Updated: 2025/09/18 17:01:37 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 14:37:45 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ t_token	*create_token(char *line, int i, int size)
 	else
 		token->quotes = 0;
 	token->type = get_type(&line[i]);
+	if (token->type == -2)
+		return (free(token), NULL);
 	if (token->quotes)
 		token->value = ft_substr(line, i + 1, size - 2);
 	else

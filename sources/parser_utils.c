@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/10 16:56:38 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 00:42:20 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 16:50:34 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ char	**fill_argv(t_token *token, int argc)
 	{
 		if (!was_red && (token->type == WORD || token->type == ENV))
 		{
-			argv[i] = strip_quotes(token->value);
+			argv[i] = strip_quotes(token->value, 0);
 			if (!argv[i])
 				return (free_tab(argv), NULL);
 			i++;
@@ -62,9 +62,10 @@ char	**fill_argv(t_token *token, int argc)
 
 void	copy_redirections(t_token *token, t_cmd *cmd)
 {
+	t_redir	*redir;
+
 	cmd->infile = NULL;
 	cmd->outfile = NULL;
-	cmd->heredoc_content = NULL;
 	cmd->content = 0;
 	cmd->redirections = NULL;
 	while (token && token->type != PIPE)
@@ -76,8 +77,12 @@ void	copy_redirections(t_token *token, t_cmd *cmd)
 				printf("syntax error near unexpected token `newline'\n");
 				return ;
 			}
-			ft_lstadd_back_redir(&(cmd->redirections),
-				ft_lstnew_redir(token->next->value, token->type));
+			redir = ft_lstnew_redir(token->next->value, token->type);
+			if (!redir)
+				return ;
+			if (token->type == HEREDOC)
+				redir->heredoc_content = get_heredoc_content(redir->file);
+			ft_lstadd_back_redir(&(cmd->redirections), redir);
 		}
 		token = token->next;
 	}
@@ -110,7 +115,10 @@ char	*get_heredoc_content(char *delimiter)
 	{
 		line = readline("> ");
 		if (!line)
+		{
+			printf("\nhere-doc delimited by EOF (wanted `%s')\n", delimiter);
 			break ;
+		}
 		if (ft_strncmp(line, delimiter, ft_strlen(delimiter)) == 0)
 		{
 			free(line);

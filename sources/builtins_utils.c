@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/29 14:52:05 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 19:23:16 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/22 17:04:33 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ int	exec_builtin(t_cmd *cmd, t_env **env)
 	if (!cmd || !cmd->argv || !cmd->argv[0])
 		return ((*env)->last_exit = -1);
 	if (ft_strcmp(cmd->argv[0], "echo") == 0)
-		return ((*env)->last_exit = builtin_echo(cmd->argv));
+		return ((*env)->last_exit = builtin_echo(cmd->argv, 1, 1, 1));
 	if (ft_strcmp(cmd->argv[0], "pwd") == 0)
 		return ((*env)->last_exit = builtin_pwd());
 	if (ft_strcmp(cmd->argv[0], "cd") == 0)

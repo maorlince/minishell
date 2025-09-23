@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 06:21:25 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 18:55:06 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 17:14:22 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ int	execute_commands(t_cmd *cmd_list, t_env **env, int i)
 	while (cmd)
 	{
 		if (is_parent_builtin(cmd) && !cmd->next)
-			return (ret = exec_builtin(cmd, env), free_cmds(cmd_list), ret);
+			return (ret = exec_builtin(cmd, env), ret);
 		if (cmd->next && pipe(fd) < 0)
 			return (perror("pipe"), -1);
 		pids[i] = launch_child(cmd, env, in_fd, fd);
@@ -137,5 +137,5 @@ int	execute_commands(t_cmd *cmd_list, t_env **env, int i)
 		cmd = cmd->next;
 	}
 	wait_all(pids, i, env);
-	return (free_cmds(cmd_list), (*env)->last_exit);
+	return ((*env)->last_exit);
 }

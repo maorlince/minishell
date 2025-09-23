@@ -6,23 +6,23 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/12 19:36:43 by manon             #+#    #+#             */
-/*   Updated: 2025/09/09 21:47:28 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/22 19:28:04 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-int	builtin_echo(char **argv)
+int	builtin_echo(char **argv, int i, int j, int new_line)
 {
-	int	i;
-	int	new_line;
 	int	space_needed;
 
-	i = 1;
-	new_line = 1;
 	space_needed = 0;
-	if (argv[1] && ft_strncmp(argv[1], "-n", 2) == 0)
+	while (argv[i] && argv[i][0] == '-' && argv[i][1] == 'n')
 	{
+		while (argv[i][j] && argv[i][j] == 'n')
+			j++;
+		if (!(argv[i][j] == '\0' && j > 1))
+			break ;
 		new_line = 0;
 		i++;
 	}

@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/12 21:46:28 by manon             #+#    #+#             */
-/*   Updated: 2025/09/16 20:06:39 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 16:43:31 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ t_redir	*ft_lstnew_redir(char *file, int type)
 	if (!new->file)
 		return (free(new), perror("malloc failed"), NULL);
 	new->type = type;
+	new->heredoc_content = NULL;
 	new->next = NULL;
 	return (new);
 }

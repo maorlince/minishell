@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:07:35 by manon             #+#    #+#             */
-/*   Updated: 2025/09/17 19:09:37 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 16:54:30 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ static void	free_redir(t_redir *redir)
 	while (redir)
 	{
 		current = redir->next;
+		if (redir->heredoc_content)
+			free(redir->heredoc_content);
 		if (redir->file)
 			free(redir->file);
 		free(redir);
@@ -58,8 +60,6 @@ void	free_cmds(t_cmd *cmds)
 			free(cmds->infile);
 		if (cmds->outfile)
 			free(cmds->outfile);
-		if (cmds->heredoc_content)
-			free(cmds->heredoc_content);
 		if (cmds->redirections)
 			free_redir(cmds->redirections);
 		free(cmds);

@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:20:08 by manon             #+#    #+#             */
-/*   Updated: 2025/09/18 17:01:57 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 14:18:31 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,11 @@ int	get_type(char *line)
 {
 	if (!line || !*line)
 		return (UNKNOWN);
-	if ((line[0] == '|' && line[1] == '|')
-		|| (is_token(line[0]) == 2 && !line[1]))
-		return (-2);
+	if (line[1] != '\0')
+	{
+		if (is_token(line[2]) == 2)
+			return (-2);
+	}
 	if (line[0] == '|' && line[1] != '|')
 		return (PIPE);
 	if (line[0] == '>')
@@ -43,36 +45,37 @@ int	get_type(char *line)
 			return (HEREDOC);
 		return (INPUT);
 	}
+	if (is_token(line[0]) == 2 && is_token(line[1]) == 2)
+		return (-2);
 	return (UNKNOWN);
 }
 
-char	*strip_quotes(const char *src)
+char	*strip_quotes(const char *src, size_t i)
 {
 	char	*out;
 	char	quote;
-	size_t	i;
 	size_t	j;
 
-	i = 0;
 	j = 0;
+	quote = 0;
+	if (!src)
+		return (NULL);
 	out = malloc(ft_strlen(src) + 1);
 	if (!out)
 		return (NULL);
 	while (src[i])
 	{
-		if (src[i] == '"' || src[i] == '\'')
-		{
+		if ((src[i] == '"' || src[i] == '\'') && !quote)
 			quote = src[i++];
-			while (src[i] && src[i] != quote)
-				out[j++] = src[i++];
-			if (src[i] == quote)
-				i++;
+		else if (src[i] == quote)
+		{
+			quote = 0;
+			i++;
 		}
 		else
 			out[j++] = src[i++];
 	}
-	out[j] = '\0';
-	return (out);
+	return (out[j] = '\0', out);
 }
 
 int	get_size(char *l, int i)
@@ -96,7 +99,7 @@ int	get_size(char *l, int i)
 				i++;
 			if (!l[i])
 				return (-1);
-			//quotes = 0;
+			quotes = 0;
 		}
 		i++;
 	}

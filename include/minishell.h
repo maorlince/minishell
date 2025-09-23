@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 14:21:04 by manon             #+#    #+#             */
-/*   Updated: 2025/09/18 17:01:27 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 16:36:55 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,6 @@
 # include <readline/readline.h>// readline et rl[...]
 # include <readline/history.h>// [...]history
 # include "../libft/libft.h"
-
-//#define EXIT_SUCCESS 0
-//#define EXIT_FAILURE 1
 
 # define UNKNOWN		0	//unknown token
 # define INPUT			1	//"<"redirection infile
@@ -57,6 +54,7 @@ typedef struct s_redir
 {
 	int				type; //1: input, 2: heredoc, 3: output, 4: append
 	char			*file; // filename for redirection
+	char			*heredoc_content; // content for heredoc
 	struct s_redir	*next;
 }	t_redir;
 
@@ -65,7 +63,7 @@ typedef struct s_cmd
 	char			**argv;
 	char			*infile; // "exemple" < "exemple_infile"
 	char			*outfile; // "exemple" > "exemple_outfile"
-	char			*heredoc_content; // "exemple" << "exemple_heredoc"
+	//char			*heredoc_content; // "exemple" << "exemple_heredoc"
 	int				content; //1: append, 0: truncate
 	t_redir			*redirections; // list of redirections
 	struct s_cmd	*next; // next command, after a pipe
@@ -100,7 +98,7 @@ void	wait_all(pid_t *pids, int count, t_env **env);
 int		execute_commands(t_cmd *cmd_list, t_env **env, int i);
 
 //builtins.c : fonctions des builtins
-int		builtin_echo(char **argv);
+int		builtin_echo(char **argv, int i, int j, int new_line);
 int		builtin_pwd(void);
 int		builtin_cd(char **argv);
 int		builtin_env(t_env *env);
@@ -127,13 +125,16 @@ void	ft_lstadd_back_redir(t_redir **lst, t_redir *new);
 t_redir	*ft_lstnew_redir(char *file, int type);
 
 //expand.c : gere les expansion des variables d'environnement
-char	*expand_variable(t_token *token, t_env *env, int i);
+char	*get_variable_value(char *str, t_env *env, char *result);
+int		get_variable_length(char *str);
+//static char join_char(char *result, char c);
+char	*expand_variable(t_token *token, t_env *env);
 int		expand_tokens(t_token *tokens, t_env *env);
 
 //lexer_utils.c : fonctions utilitaires pour le lexer
 int		is_token(char c);
 int		get_type(char *line);
-char	*strip_quotes(const char *src);
+char	*strip_quotes(const char *src, size_t i);
 int		get_size(char *line, int i);
 
 //lexer.c : tokenize la ligne de commande

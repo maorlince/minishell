@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:45:48 by manon             #+#    #+#             */
-/*   Updated: 2025/09/16 21:37:43 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 17:18:26 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ int	is_parent_builtin(t_cmd *cmd)
 
 void	update_fds(int *in_fd, int fd[2], t_cmd *cmd)
 {
+	if (!cmd)
+		return ;
 	if (*in_fd)
 		close(*in_fd);
 	if (cmd->next)

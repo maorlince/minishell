@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:49 by manon             #+#    #+#             */
-/*   Updated: 2025/09/16 21:21:09 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 16:54:53 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,31 +97,31 @@ int	setup_input_output(t_redir *tmp)
 
 int	setup_redirections(t_cmd *cmd)
 {
-	int		fd;
 	t_redir	*tmp;
-	int		ret;
+	int		fd;
 
-	if (!cmd)
-		return (0);
-	ret = 0;
 	tmp = cmd->redirections;
 	while (tmp)
 	{
-		if (tmp->type == HEREDOC && tmp->file)
-			ret = setup_heredoc(tmp->file);
-		else if ((tmp->type == INPUT || tmp->type == OUTPUT) && tmp->file)
-			ret = setup_input_output(tmp);
-		else if (tmp->type == APPEND && tmp->file)
+		if (tmp->file && tmp->type <= 4 && tmp->type >= 1)
 		{
-			fd = open(tmp->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
-			if (fd < 0 || dup2(fd, STDOUT_FILENO) == -1)
-				return (perror("dup2"), 1);
-			if (fd >= 0)
-				close(fd);
+			if (tmp->type == 2 && setup_heredoc(tmp->heredoc_content) != 0)
+				return (1);
+			else if (tmp->type == INPUT)
+				fd = open(tmp->file, O_RDONLY);
+			else if (tmp->type == OUTPUT)
+				fd = open(tmp->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			else if (tmp->type == APPEND)
+				fd = open(tmp->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+			if (fd < 0)
+				return (perror(tmp->file), 1);
+			if (dup2(fd, STDOUT_FILENO) == -1)
+				return (perror("dup2"), close(fd), 1);
+			close(fd);
 		}
 		tmp = tmp->next;
 	}
-	return (ret);
+	return (0);
 }
 
 t_cmd	*parse_tokens(t_token *tokens)
