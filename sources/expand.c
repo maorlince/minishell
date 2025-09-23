@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/19 17:10:19 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 15:17:33 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/23 18:02:55 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ char	*get_variable_value(char *dollar_pos, t_env *env, char *result)
 	var_value = env_get(env, var_name);
 	free(var_name);
 	if (var_value)
-		return (ft_strjoin(var_value, result));
+		return (ft_strjoin(result, var_value));
 	return (ft_strdup(""));
 }
 
