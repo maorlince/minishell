@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:49 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 16:54:53 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 23:02:34 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,9 @@ t_cmd	*create_command(t_token **token_list)
 		return (perror("malloc"), NULL);
 	cmd->argv = fill_argv(*token_list, argc);
 	if (!cmd->argv)
-		return (free(cmd), NULL);
-	copy_redirections(*token_list, cmd);
+		return (free_cmds(cmd), NULL);
+	if (copy_redirections(*token_list, cmd) == -1)
+		return (free_cmds(cmd), NULL);
 	cmd->next = NULL;
 	while (*token_list && (*token_list)->type != PIPE)
 		*token_list = (*token_list)->next;
@@ -37,6 +38,8 @@ t_cmd	*create_command(t_token **token_list)
 	{
 		*token_list = (*token_list)->next;
 		cmd->next = create_command(token_list);
+		if (!cmd->next)
+			return (free_cmds(cmd), NULL);
 	}
 	return (cmd);
 }

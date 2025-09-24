@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 14:21:04 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 16:36:55 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 22:58:38 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ int		lexer(t_token **token_list, t_env *env, char *line);
 //parser_utils.c : fonctions utilitaires
 int		count_args(t_token *token);
 char	**fill_argv(t_token *token, int argc);
-void	copy_redirections(t_token *token, t_cmd *cmd);
+int		copy_redirections(t_token *token, t_cmd *cmd);
 void	append_line(char **content, char *line);
 char	*get_heredoc_content(char *delimiter);
 

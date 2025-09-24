@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:15 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 14:37:45 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 21:45:17 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ static int	add_new_token(t_token **head, t_token **current, char *line,
 
 	new = create_token(line, 0, size);
 	if (!new)
-		return (free_tokens(*head), 1);
+		return (free_tokens(*head), *head = NULL, 1);
 	if (!*head)
 		*head = new;
 	else
@@ -75,7 +75,7 @@ int	lexer(t_token **head, t_env *env, char *line)
 		if (size == -2)
 		{
 			printf("syntax error near unexpected token \"%c\"\n", line[i]);
-			return (free_tokens(*head), -1);
+			return (free_tokens(*head), *head = NULL, -1);
 		}
 		if (add_new_token(head, &current, &line[i], size))
 			return (1);

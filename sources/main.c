@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 17:10:04 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 23:12:12 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,12 @@
 // still reachable readline ~230-240 bytes normal
 //valgrind --leak-check=full --trace-children=yes --track-fds=yes 
 //--show-leak-kinds=all --suppressions=.supp --errors-for-leak-kinds=all
+
+//trop grande commande 
+// cat    <out
+//$ " '"
+//<< eof error valgrind
+//ls << conditionnal jump
 
 static void	handle_signal(int sig)
 {

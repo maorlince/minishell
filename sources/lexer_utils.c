@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:20:08 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 14:18:31 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 23:04:51 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,8 @@ int	get_size(char *l, int i)
 		return (0);
 	if (get_type(l) != UNKNOWN)
 	{
+		if (get_type(l) == -2)
+			return (-2);
 		if ((l[0] == '>' && l[1] == '>') || (l[0] == '<' && l[1] == '<'))
 			return (2);
 		return (1);
@@ -99,7 +101,6 @@ int	get_size(char *l, int i)
 				i++;
 			if (!l[i])
 				return (-1);
-			quotes = 0;
 		}
 		i++;
 	}

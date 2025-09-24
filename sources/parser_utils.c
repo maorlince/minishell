@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/10 16:56:38 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 16:50:34 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 22:58:24 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,11 @@ char	**fill_argv(t_token *token, int argc)
 	return (argv);
 }
 
-void	copy_redirections(t_token *token, t_cmd *cmd)
+int	copy_redirections(t_token *token, t_cmd *cmd)
 {
 	t_redir	*redir;
 
+	redir = NULL;
 	cmd->infile = NULL;
 	cmd->outfile = NULL;
 	cmd->content = 0;
@@ -75,17 +76,18 @@ void	copy_redirections(t_token *token, t_cmd *cmd)
 			if (!token->next || !token->next->value)
 			{
 				printf("syntax error near unexpected token `newline'\n");
-				return ;
+				return (-1);
 			}
 			redir = ft_lstnew_redir(token->next->value, token->type);
 			if (!redir)
-				return ;
+				return (-1);
 			if (token->type == HEREDOC)
 				redir->heredoc_content = get_heredoc_content(redir->file);
 			ft_lstadd_back_redir(&(cmd->redirections), redir);
 		}
 		token = token->next;
 	}
+	return (0);
 }
 
 void	append_line(char **content, char *line)
