@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:49 by manon             #+#    #+#             */
-/*   Updated: 2025/09/24 23:02:34 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/25 01:28:18 by mlemerci         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,20 +18,17 @@ t_cmd	*create_command(t_token **token_list)
 	int		argc;
 
 	if (!token_list || !*token_list || (*token_list)->type == PIPE)
-	{
-		printf("syntax error near unexpected token `|'\n");
-		return (NULL);
-	}
+		return (printf("syntax error near unexpected token `|'\n"), NULL);
 	argc = count_args(*token_list);
 	cmd = malloc(sizeof(t_cmd));
 	if (!cmd)
 		return (perror("malloc"), NULL);
+	cmd->next = NULL;
 	cmd->argv = fill_argv(*token_list, argc);
 	if (!cmd->argv)
 		return (free_cmds(cmd), NULL);
 	if (copy_redirections(*token_list, cmd) == -1)
 		return (free_cmds(cmd), NULL);
-	cmd->next = NULL;
 	while (*token_list && (*token_list)->type != PIPE)
 		*token_list = (*token_list)->next;
 	if (*token_list && (*token_list)->type == PIPE)
@@ -97,35 +94,82 @@ int	setup_input_output(t_redir *tmp)
 	}
 	return (0);
 }
-
 int	setup_redirections(t_cmd *cmd)
 {
 	t_redir	*tmp;
 	int		fd;
 
+	if (!cmd)
+		return (0);
 	tmp = cmd->redirections;
 	while (tmp)
 	{
-		if (tmp->file && tmp->type <= 4 && tmp->type >= 1)
+		if (tmp->type == HEREDOC)
 		{
-			if (tmp->type == 2 && setup_heredoc(tmp->heredoc_content) != 0)
-				return (1);
-			else if (tmp->type == INPUT)
-				fd = open(tmp->file, O_RDONLY);
-			else if (tmp->type == OUTPUT)
-				fd = open(tmp->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			else if (tmp->type == APPEND)
-				fd = open(tmp->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
-			if (fd < 0)
-				return (perror(tmp->file), 1);
-			if (dup2(fd, STDOUT_FILENO) == -1)
-				return (perror("dup2"), close(fd), 1);
-			close(fd);
+			if (tmp->heredoc_content)
+			{
+				if (setup_heredoc(tmp->heredoc_content) != 0)
+					return (1);
+			}
+			tmp = tmp->next;
+			continue ;
 		}
+		if (!tmp->file)
+		{
+			tmp = tmp->next;
+			continue ;
+		}
+		fd = -1;
+		if (tmp->type == INPUT)
+			fd = open(tmp->file, O_RDONLY);
+		else if (tmp->type == OUTPUT)
+			fd = open(tmp->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		else if (tmp->type == APPEND)
+			fd = open(tmp->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		if (fd < 0)
+			return (perror(tmp->file), 1);
+		if (tmp->type == INPUT)
+		{
+			if (dup2(fd, STDIN_FILENO) == -1)
+				return (perror("dup2"), close(fd), 1);
+		}
+		else if (dup2(fd, STDOUT_FILENO) == -1)
+			return (perror("dup2"), close(fd), 1);
+		close(fd);
 		tmp = tmp->next;
 	}
 	return (0);
 }
+
+//regle << eof
+//int	setup_redirections(t_cmd *cmd)
+//{
+//	t_redir	*tmp;
+//	int		fd;
+//
+//	tmp = cmd->redirections;
+//	while (tmp)
+//	{
+//		if (tmp->file && tmp->type <= 4 && tmp->type >= 1)
+//		{
+//			if (tmp->type == 2 && setup_heredoc(tmp->heredoc_content) != 0)
+//				return (1);
+//			else if (tmp->type == INPUT)
+//				fd = open(tmp->file, O_RDONLY);
+//			else if (tmp->type == OUTPUT)
+//				fd = open(tmp->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+//			else if (tmp->type == APPEND)
+//				fd = open(tmp->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+//			if (fd < 0)
+//				return (perror(tmp->file), 1);
+//			if (dup2(fd, STDOUT_FILENO) == -1)
+//				return (perror("dup2"), close(fd), 1);
+//			close(fd);
+//		}
+//		tmp = tmp->next;
+//	}
+//	return (0);
+//}
 
 t_cmd	*parse_tokens(t_token *tokens)
 {

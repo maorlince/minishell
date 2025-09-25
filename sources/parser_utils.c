@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/10 16:56:38 by manon             #+#    #+#             */
-/*   Updated: 2025/09/24 22:58:24 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/24 23:46:12 by mlemerci         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,8 @@ int	copy_redirections(t_token *token, t_cmd *cmd)
 		if (token->type >= INPUT && token->type <= APPEND)
 		{
 			if (!token->next || !token->next->value)
-			{
-				printf("syntax error near unexpected token `newline'\n");
-				return (-1);
-			}
+				return (printf("syntax error near unexpected token `newline'\n"),
+					-1);
 			redir = ft_lstnew_redir(token->next->value, token->type);
 			if (!redir)
 				return (-1);

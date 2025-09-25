@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
+/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/09/24 23:12:12 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/25 01:13:42 by mlemerci         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@
 //trop grande commande 
 // cat    <out
 //$ " '"
-//<< eof error valgrind
-//ls << conditionnal jump
+//<< eof error valgrind -> setup_redirections a revoir
 
 static void	handle_signal(int sig)
 {
