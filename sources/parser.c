@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 17:03:49 by manon             #+#    #+#             */
-/*   Updated: 2025/09/25 01:28:18 by mlemerci         ###   ########.fr       */
+/*   Updated: 2025/09/30 01:46:12 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,10 @@ int	setup_input_output(t_redir *tmp)
 	}
 	return (0);
 }
+
 int	setup_redirections(t_cmd *cmd)
 {
+	//a cut en deux fonctions
 	t_redir	*tmp;
 	int		fd;
 
@@ -141,7 +143,6 @@ int	setup_redirections(t_cmd *cmd)
 	return (0);
 }
 
-//regle << eof
 //int	setup_redirections(t_cmd *cmd)
 //{
 //	t_redir	*tmp;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/09/25 01:13:42 by mlemerci         ###   ########.fr       */
+/*   Updated: 2025/09/30 01:32:09 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,6 @@
 // still reachable readline ~230-240 bytes normal
 //valgrind --leak-check=full --trace-children=yes --track-fds=yes 
 //--show-leak-kinds=all --suppressions=.supp --errors-for-leak-kinds=all
-
-//trop grande commande 
-// cat    <out
-//$ " '"
-//<< eof error valgrind -> setup_redirections a revoir
 
 static void	handle_signal(int sig)
 {

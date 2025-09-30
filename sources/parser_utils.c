@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/10 16:56:38 by manon             #+#    #+#             */
-/*   Updated: 2025/09/24 23:46:12 by mlemerci         ###   ########.fr       */
+/*   Updated: 2025/09/30 01:47:35 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,22 +32,59 @@ int	count_args(t_token *token)
 	return (count);
 }
 
+//char	**fill_argv(t_token *token, int argc)
+//{
+//	char	**argv;
+//	int		i;
+//	int		was_red;
+//
+//	i = 0;
+//	was_red = 0;
+//	argv = malloc(sizeof(char *) * (argc + 1));
+//	while (argv && token && token->type != PIPE)
+//	{
+//		if (!was_red && (token->type == WORD || token->type == ENV))
+//		{
+//			argv[i] = strip_quotes(token->value, 0);
+//			if (!argv[i])
+//				return (free_tab(argv), NULL);
+//			i++;
+//		}
+//		else if (token->type >= INPUT && token->type <= APPEND)
+//			was_red = 1;
+//		else if (was_red)
+//			was_red = 0;
+//		token = token->next;
+//	}
+//	argv[i] = NULL;
+//	return (argv);
+//}
+
 char	**fill_argv(t_token *token, int argc)
 {
 	char	**argv;
 	int		i;
 	int		was_red;
+	int		j;
 
 	i = 0;
 	was_red = 0;
 	argv = malloc(sizeof(char *) * (argc + 1));
-	while (argv && token && token->type != PIPE)
+	if (!argv)
+		return (NULL);
+	while (token && token->type != PIPE)
 	{
 		if (!was_red && (token->type == WORD || token->type == ENV))
 		{
 			argv[i] = strip_quotes(token->value, 0);
 			if (!argv[i])
-				return (free_tab(argv), NULL);
+			{
+				j = 0;
+				while (j < i)
+					free(argv[j++]);
+				return (free(argv), NULL);
+				//acomparer avec github
+			}
 			i++;
 		}
 		else if (token->type >= INPUT && token->type <= APPEND)
@@ -78,7 +115,7 @@ int	copy_redirections(t_token *token, t_cmd *cmd)
 					-1);
 			redir = ft_lstnew_redir(token->next->value, token->type);
 			if (!redir)
-				return (-1);
+				return (free((cmd->redirections)), -1);
 			if (token->type == HEREDOC)
 				redir->heredoc_content = get_heredoc_content(redir->file);
 			ft_lstadd_back_redir(&(cmd->redirections), redir);
