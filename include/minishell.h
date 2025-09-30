@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mlemerci <mlemerci@student.42.fr>          +#+  +:+       +#+        */
+/*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 14:21:04 by manon             #+#    #+#             */
-/*   Updated: 2025/09/24 23:47:07 by mlemerci         ###   ########.fr       */
+/*   Updated: 2025/09/30 13:13:16 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ char	*build_full_path(char *dir, const char *name);
 int		is_parent_builtin(t_cmd *cmd);
 void	update_fds(int *in_fd, int fd[2], t_cmd *cmd);
 void	wait_all(pid_t *pids, int count, t_env **env);
+char	*find_command(const char *name, t_env *env);
 
 //exec.c : fonctions d'exécution
 //static char	*find_command(const char *name, t_env *env);
@@ -144,19 +145,15 @@ int		lexer(t_token **token_list, t_env *env, char *line);
 
 //parser_utils.c : fonctions utilitaires
 int		count_args(t_token *token);
-char	**fill_argv(t_token *token, int argc);
+char	**fill_argv(t_token *token, char **argv, int i, int was_red);
 int		copy_redirections(t_token *token, t_cmd *cmd);
-void	append_line(char **content, char *line);
+//void	append_line(char **content, char *line);
+t_cmd	*create_command(t_token **token_list);
 char	*get_heredoc_content(char *delimiter);
 
-//utils.c : fonctions utilitaires diverses
-t_redir	*ft_lstnew_redir(char *file, int type);
-void	ft_lstadd_back_redir(t_redir **lst, t_redir *new);
-
 //parser.c : crée les commandes à partir des tokens
-t_cmd	*create_command(t_token **token_list);
 int		setup_heredoc(char *content);
-int		setup_redirections(t_cmd *cmd);
+int		setup_redirections(t_cmd *cmd, t_redir *tmp);
 t_cmd	*parse_tokens(t_token *tokens);
 
 #endif

@@ -6,42 +6,14 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 06:21:25 by manon             #+#    #+#             */
-/*   Updated: 2025/09/30 01:48:31 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/30 13:03:35 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minishell.h"
 
-static char	*find_command(const char *name, t_env *env)
-{
-	char	*path_env;
-	char	**dirs;
-	char	*full;
-	int		i;
-
-	path_env = env_get(env, "PATH");
-	if (!path_env || !name || !*name)
-		return (NULL);
-	dirs = ft_split(path_env, ':');
-	if (!dirs)
-		return (NULL);
-	i = 0;
-	while (dirs[i])
-	{
-		full = build_full_path(dirs[i], name);
-		if (!full)
-			break ;
-		if (access(full, X_OK) == 0)
-			return (free_tab(dirs), full);
-		free(full);
-		i++;
-	}
-	free_tab(dirs);
-	return (NULL);
-}
-
 static void	exec_external(t_cmd *cmd, t_env **env,
-	t_cmd *cmd_list, char **env_tab)
+		t_cmd *cmd_list, char **env_tab)
 {
 	char	*path;
 
@@ -84,40 +56,12 @@ static void	child_process(t_cmd *cmd, t_env **env, t_cmd *cmd_list)
 	exec_external(cmd, env, cmd_list, env_tab);
 }
 
-//static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd, int *fd)
-//{
-//	pid_t	pid;
-//	t_cmd	*cmd_list;
-//
-//	cmd_list = cmd;
-//	pid = fork();
-//	if (pid < 0)
-//		return (-1);
-//	if (pid == 0)
-//	{
-//		if (in_fd != 0)
-//		{
-//			dup2(in_fd, 0);
-//			close(in_fd);
-//		}
-//		if (cmd->next)
-//		{
-//			close(fd[0]);
-//			dup2(fd[1], 1);
-//			close(fd[1]);
-//		}
-//		if (setup_redirections(cmd) != 0)
-//			exit(1);
-//		child_process(cmd, env, cmd_list);
-//	}
-//	return (pid);
-//}
-static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd,
-	int *fd, t_cmd *cmd_list)
-	//trouver quel variable supprimer
+static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd, int *fd)
 {
 	pid_t	pid;
+	t_cmd	*cmd_list;
 
+	cmd_list = cmd;
 	pid = fork();
 	if (pid < 0)
 		return (-1);
@@ -134,7 +78,7 @@ static pid_t	launch_child(t_cmd *cmd, t_env **env, int in_fd,
 			dup2(fd[1], 1);
 			close(fd[1]);
 		}
-		if (setup_redirections(cmd) != 0)
+		if (setup_redirections(cmd, cmd->redirections) != 0)
 			exit(1);
 		child_process(cmd, env, cmd_list);
 	}
@@ -157,7 +101,7 @@ int	execute_commands(t_cmd *cmd_list, t_env **env, int i)
 			return (ret = exec_builtin(cmd, env), ret);
 		if (cmd->next && pipe(fd) < 0)
 			return (perror("pipe"), -1);
-		pids[i] = launch_child(cmd, env, in_fd, fd, cmd_list);
+		pids[i] = launch_child(cmd, env, in_fd, fd);
 		if (pids[i] < 0)
 			return (perror("fork"), -1);
 		i++;

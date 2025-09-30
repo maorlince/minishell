@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:20:08 by manon             #+#    #+#             */
-/*   Updated: 2025/09/24 23:04:51 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/30 12:32:06 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,25 +53,24 @@ int	get_type(char *line)
 char	*strip_quotes(const char *src, size_t i)
 {
 	char	*out;
-	char	quote;
+	char	outer_quote;
 	size_t	j;
 
 	j = 0;
-	quote = 0;
+	outer_quote = 0;
 	if (!src)
 		return (NULL);
 	out = malloc(ft_strlen(src) + 1);
 	if (!out)
 		return (NULL);
+	if ((src[0] == '"' || src[0] == '\'') && src[ft_strlen(src) - 1] == src[0])
+		outer_quote = src[0];
 	while (src[i])
 	{
-		if ((src[i] == '"' || src[i] == '\'') && !quote)
-			quote = src[i++];
-		else if (src[i] == quote)
-		{
-			quote = 0;
+		if (outer_quote && i == 0)
 			i++;
-		}
+		else if (outer_quote && i == ft_strlen(src) - 1)
+			break ;
 		else
 			out[j++] = src[i++];
 	}

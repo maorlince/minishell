@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/12 00:45:48 by manon             #+#    #+#             */
-/*   Updated: 2025/09/23 17:18:26 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/30 13:03:44 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,32 @@ void	wait_all(pid_t *pids, int count, t_env **env)
 			(*env)->last_exit = 128 + WTERMSIG(status);
 		i++;
 	}
+}
+
+char	*find_command(const char *name, t_env *env)
+{
+	char	*path_env;
+	char	**dirs;
+	char	*full;
+	int		i;
+
+	path_env = env_get(env, "PATH");
+	if (!path_env || !name || !*name)
+		return (NULL);
+	dirs = ft_split(path_env, ':');
+	if (!dirs)
+		return (NULL);
+	i = 0;
+	while (dirs[i])
+	{
+		full = build_full_path(dirs[i], name);
+		if (!full)
+			break ;
+		if (access(full, X_OK) == 0)
+			return (free_tab(dirs), full);
+		free(full);
+		i++;
+	}
+	free_tab(dirs);
+	return (NULL);
 }

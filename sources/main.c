@@ -6,7 +6,7 @@
 /*   By: manon <manon@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 22:16:55 by manon             #+#    #+#             */
-/*   Updated: 2025/09/30 01:32:09 by manon            ###   ########.fr       */
+/*   Updated: 2025/09/30 13:09:22 by manon            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,26 @@
 // still reachable readline ~230-240 bytes normal
 //valgrind --leak-check=full --trace-children=yes --track-fds=yes 
 //--show-leak-kinds=all --suppressions=.supp --errors-for-leak-kinds=all
+
+int	count_args(t_token *token)
+{
+	int	count;
+	int	was_red;
+
+	count = 0;
+	was_red = 0;
+	while (token && token->type != PIPE)
+	{
+		if (!was_red && (token->type == WORD || token->type == ENV))
+			count++;
+		if (token->type >= INPUT && token->type <= APPEND)
+			was_red = 1;
+		else if (was_red)
+			was_red = 0;
+		token = token->next;
+	}
+	return (count);
+}
 
 static void	handle_signal(int sig)
 {
